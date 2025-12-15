@@ -18,7 +18,13 @@ import {
   SubmitButton,
 } from "#components/form/button";
 import { OptionProps, Select } from "#components/form/field";
-import { EditDialog, InfoBox, PageCode, PageText } from "#styles/common";
+import {
+  EditDialog,
+  InfoBox,
+  PageCode,
+  PageSectionSpacer,
+  PageText,
+} from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -31,6 +37,7 @@ import {
   setStorageItem,
 } from "#utils/storage";
 import { ActionButtonsContainer } from "./Overview.style";
+import { Stratigraphy } from "./Stratigraphy";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({
   fieldComponents: {
@@ -354,6 +361,14 @@ export function Overview({
         rmsData={rmsData}
         projectReadOnly={projectReadOnly}
         setIsRmsProjectOpen={setIsRmsProjectOpen}
+        isRmsProjectOpen={isRmsProjectOpen}
+      />
+
+      <PageSectionSpacer />
+
+      <Stratigraphy
+        rmsData={rmsData}
+        projectReadOnly={projectReadOnly}
         isRmsProjectOpen={isRmsProjectOpen}
       />
     </>
