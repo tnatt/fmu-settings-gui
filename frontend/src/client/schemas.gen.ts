@@ -271,7 +271,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.13.1.dev2+g7e3449248'
+            default: '0.14.2.dev3+g4dd7f1961'
         }
     },
     type: 'object',
@@ -543,21 +543,62 @@ export const ProjectConfigSchema = {
 Stored as config.json.`
 } as const;
 
-export const RmsHorizonListSchema = {
+export const RmsCoordinateSystemSchema = {
     properties: {
-        horizons: {
-            items: {
-                '$ref': '#/components/schemas/fmu_settings_api__models__rms__RmsHorizon'
-            },
-            type: 'array',
-            title: 'Horizons',
-            description: 'List of horizons in the project.'
+        name: {
+            type: 'string',
+            title: 'Name'
         }
     },
     type: 'object',
-    required: ['horizons'],
-    title: 'RmsHorizonList',
-    description: 'List of horizons from an RMS project.'
+    required: ['name'],
+    title: 'RmsCoordinateSystem',
+    description: 'The project coordinate system of an RMS project.'
+} as const;
+
+export const RmsCoordinateSystemMatchSchema = {
+    properties: {
+        rms_crs_sys: {
+            '$ref': '#/components/schemas/RmsCoordinateSystem',
+            description: 'The source coordinate system to be matched.'
+        },
+        smda_crs_sys: {
+            '$ref': '#/components/schemas/CoordinateSystem',
+            description: 'The matched target coordinate system.'
+        },
+        score: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score',
+            description: 'Similarity score for the coordinate systems (0-100).'
+        },
+        confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            title: 'Confidence',
+            description: `Confidence level based on score.
+
+'high' (>80), 'medium' (50-80), 'low' (<50).`
+        }
+    },
+    type: 'object',
+    required: ['rms_crs_sys', 'smda_crs_sys', 'score', 'confidence'],
+    title: 'RmsCoordinateSystemMatch',
+    description: 'A matched coordinate system.'
+} as const;
+
+export const RmsHorizonSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'RmsHorizon',
+    description: 'A horizon from an RMS project.'
 } as const;
 
 export const RmsProjectSchema = {
@@ -574,7 +615,7 @@ export const RmsProjectSchema = {
         coordinate_system: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/fmu__settings__models__project_config__RmsCoordinateSystem'
+                    '$ref': '#/components/schemas/RmsCoordinateSystem'
                 },
                 {
                     type: 'null'
@@ -585,7 +626,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/fmu__settings__models__project_config__RmsStratigraphicZone'
+                        '$ref': '#/components/schemas/RmsStratigraphicZone'
                     },
                     type: 'array'
                 },
@@ -599,7 +640,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/fmu__settings__models__project_config__RmsHorizon'
+                        '$ref': '#/components/schemas/RmsHorizon'
                     },
                     type: 'array'
                 },
@@ -613,7 +654,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/fmu__settings__models__project_config__RmsWell'
+                        '$ref': '#/components/schemas/RmsWell'
                     },
                     type: 'array'
                 },
@@ -663,38 +704,70 @@ export const RmsProjectPathsResultSchema = {
     description: 'List of RMS project paths within the FMU project.'
 } as const;
 
-export const RmsWellListSchema = {
+export const RmsStratigraphicZoneSchema = {
     properties: {
-        wells: {
-            items: {
-                '$ref': '#/components/schemas/fmu_settings_api__models__rms__RmsWell'
-            },
-            type: 'array',
-            title: 'Wells',
-            description: 'List of wells in the project.'
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        top_horizon_name: {
+            type: 'string',
+            title: 'Top Horizon Name'
+        },
+        base_horizon_name: {
+            type: 'string',
+            title: 'Base Horizon Name'
         }
     },
     type: 'object',
-    required: ['wells'],
-    title: 'RmsWellList',
-    description: 'List of wells from an RMS project.'
+    required: ['name', 'top_horizon_name', 'base_horizon_name'],
+    title: 'RmsStratigraphicZone',
+    description: 'A stratigraphic zone from an RMS project.'
 } as const;
 
-export const RmsZoneListSchema = {
+export const RmsStratigraphyMatchSchema = {
     properties: {
-        zones: {
-            items: {
-                '$ref': '#/components/schemas/fmu_settings_api__models__rms__RmsStratigraphicZone'
-            },
-            type: 'array',
-            title: 'Zones',
-            description: 'List of zones in the project.'
+        rms_zone: {
+            '$ref': '#/components/schemas/RmsStratigraphicZone',
+            description: 'The RMS stratigraphic zone.'
+        },
+        smda_unit: {
+            '$ref': '#/components/schemas/StratigraphicUnit',
+            description: 'The matched SMDA stratigraphic unit.'
+        },
+        score: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score',
+            description: 'Similarity score for the zone/unit names (0-100).'
+        },
+        confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            title: 'Confidence',
+            description: `Confidence level based on score.
+
+'high' (>80), 'medium' (50-80), 'low' (<50).`
         }
     },
     type: 'object',
-    required: ['zones'],
-    title: 'RmsZoneList',
-    description: 'List of zones from an RMS project.'
+    required: ['rms_zone', 'smda_unit', 'score', 'confidence'],
+    title: 'RmsStratigraphyMatch',
+    description: 'A matched pair of RMS zone and SMDA stratigraphic unit.'
+} as const;
+
+export const RmsWellSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'RmsWell',
+    description: 'A well from an RMS project.'
 } as const;
 
 export const SessionResponseSchema = {
@@ -1162,130 +1235,4 @@ export const ValidationErrorSchema = {
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
-} as const;
-
-export const fmu__settings__models__project_config__RmsCoordinateSystemSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsCoordinateSystem',
-    description: 'The project coordinate system of an RMS project.'
-} as const;
-
-export const fmu__settings__models__project_config__RmsHorizonSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsHorizon',
-    description: 'A horizon from an RMS project.'
-} as const;
-
-export const fmu__settings__models__project_config__RmsStratigraphicZoneSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name'
-        },
-        top_horizon_name: {
-            type: 'string',
-            title: 'Top Horizon Name'
-        },
-        base_horizon_name: {
-            type: 'string',
-            title: 'Base Horizon Name'
-        }
-    },
-    type: 'object',
-    required: ['name', 'top_horizon_name', 'base_horizon_name'],
-    title: 'RmsStratigraphicZone',
-    description: 'A stratigraphic zone from an RMS project.'
-} as const;
-
-export const fmu__settings__models__project_config__RmsWellSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsWell',
-    description: 'A well from an RMS project.'
-} as const;
-
-export const fmu_settings_api__models__rms__RmsCoordinateSystemSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name',
-            description: 'Name of the coordinate system.'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsCoordinateSystem',
-    description: 'The project coordinate system of an RMS project.'
-} as const;
-
-export const fmu_settings_api__models__rms__RmsHorizonSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name',
-            description: 'Name of the horizon.'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsHorizon',
-    description: 'A horizon from an RMS project.'
-} as const;
-
-export const fmu_settings_api__models__rms__RmsStratigraphicZoneSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name',
-            description: 'Name of the zone.'
-        },
-        top: {
-            type: 'string',
-            title: 'Top',
-            description: 'Name of the horizon at the top of the zone.'
-        },
-        base: {
-            type: 'string',
-            title: 'Base',
-            description: 'Name of the horizon at the base of the zone.'
-        }
-    },
-    type: 'object',
-    required: ['name', 'top', 'base'],
-    title: 'RmsStratigraphicZone',
-    description: 'A stratigraphic zone from an RMS project.'
-} as const;
-
-export const fmu_settings_api__models__rms__RmsWellSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            title: 'Name',
-            description: 'Name of the well.'
-        }
-    },
-    type: 'object',
-    required: ['name'],
-    title: 'RmsWell',
-    description: 'A well from an RMS project.'
 } as const;
