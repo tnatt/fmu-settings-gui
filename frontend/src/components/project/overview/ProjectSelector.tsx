@@ -16,6 +16,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
+  projectGetGlobalConfigStatusQueryKey,
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
   projectGetRmsProjectsQueryKey,
@@ -81,6 +82,9 @@ function ProjectSelectorForm({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetGlobalConfigStatusQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetRmsProjectsQueryKey(),
@@ -302,6 +306,7 @@ function ConfirmInitProjectDialog({
   valueSource: string;
 }) {
   const queryClient = useQueryClient();
+
   const { mutate } = useMutation({
     ...projectPostInitProjectMutation(),
     onSuccess: () => {
@@ -336,10 +341,11 @@ function ConfirmInitProjectDialog({
   };
 
   return (
-    <EditDialog open={isOpen}>
+    <EditDialog open={isOpen} $minWidth="28em">
       <Dialog.Header>
         <Dialog.Title>Initialize project</Dialog.Title>
       </Dialog.Header>
+
       <Dialog.CustomContent>
         <PageText bold={true}> {projectPath} </PageText>
         <PageText>
@@ -348,6 +354,7 @@ function ConfirmInitProjectDialog({
           Would you like to initialize?
         </PageText>
       </Dialog.CustomContent>
+
       <Dialog.Actions>
         <Button
           onClick={() => {
@@ -375,6 +382,7 @@ export function ProjectSelector() {
   return (
     <>
       <Button onClick={handleOpen}>Select project</Button>
+
       <ProjectSelectorForm
         closeDialog={handleClose}
         isDialogOpen={isDialogOpen}

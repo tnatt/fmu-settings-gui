@@ -5,11 +5,13 @@ export function GeneralButton({
   disabled,
   tooltipText,
   onClick,
+  isPending,
 }: {
   label: string;
   disabled?: boolean;
   tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  isPending?: boolean;
 }) {
   return (
     <Tooltip title={tooltipText ?? ""}>
@@ -23,7 +25,7 @@ export function GeneralButton({
             : onClick
         }
       >
-        {label}
+        {isPending ? <DotProgress /> : label}
       </Button>
     </Tooltip>
   );

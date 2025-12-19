@@ -1,10 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
+import { projectGetGlobalConfigStatusOptions } from "#client/@tanstack/react-query.gen";
 import { FmuProject, LockStatus } from "#client/types.gen";
 import { Loading } from "#components/common";
 import { LockStatusBanner } from "#components/LockStatus";
 import { EditableAccessInfo } from "#components/project/overview/Access";
+import { ImportGlobalConfig } from "#components/project/overview/ImportGlobalConfig";
 import { EditableModelInfo } from "#components/project/overview/Model";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
@@ -15,6 +18,10 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
+import {
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+} from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 export const Route = createFileRoute("/project/")({
   component: RouteComponent,
@@ -86,15 +93,35 @@ function ProjectNotFound({ text }: { text: string }) {
 
 function Content() {
   const project = useProject();
+  const config = project.data?.config;
+  const missingRequiredData = config && !config.masterdata;
+
+  const { isSuccess: globalConfigCanBeImported } = useQuery({
+    ...projectGetGlobalConfigStatusOptions(),
+    enabled: missingRequiredData,
+    meta: {
+      preventDefaultErrorHandling: [
+        HTTP_STATUS_NOT_FOUND,
+        HTTP_STATUS_UNPROCESSABLE_CONTENT,
+      ],
+    },
+  });
 
   return (
     <>
       {project.status && project.data ? (
         <>
+          {missingRequiredData && globalConfigCanBeImported && (
+            <ImportGlobalConfig
+              projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? true)}
+            />
+          )}
+
           <ProjectInfo
             projectData={project.data}
             lockStatus={project.lockStatus}
           />
+
           <ProjectSelector />
 
           <PageSectionSpacer />

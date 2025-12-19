@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { ValidationError } from "#client";
 
 export const HTTP_STATUS_UNAUTHORIZED = 401;
+export const HTTP_STATUS_NOT_FOUND = 404;
 export const HTTP_STATUS_UNPROCESSABLE_CONTENT = 422;
 
 export function httpValidationErrorToString(
