@@ -31,6 +31,7 @@ import {
   smdaGetHealthQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import { client } from "#client/client.gen";
+import { SessionExpireDialog } from "#components/SessionExpireDialog";
 import { msalConfig } from "#config";
 import {
   createSessionAsync,
@@ -43,7 +44,6 @@ import {
 import { defaultErrorHandling } from "#utils/query";
 import { mutationRetry } from "#utils/query";
 import { routeTree } from "./routeTree.gen";
-
 export interface RouterContext {
   queryClient: QueryClient;
   apiToken: string;
@@ -256,18 +256,21 @@ export function App() {
   }, [msalInstance, patchAccessTokenMutate]);
 
   return (
-    <RouterProvider
-      router={router}
-      context={{
-        apiToken,
-        setApiToken,
-        apiTokenStatus,
-        setApiTokenStatus,
-        hasResponseInterceptor,
-        accessToken,
-        createSessionMutateAsync,
-      }}
-    />
+    <>
+      <RouterProvider
+        router={router}
+        context={{
+          apiToken,
+          setApiToken,
+          apiTokenStatus,
+          setApiTokenStatus,
+          hasResponseInterceptor,
+          accessToken,
+          createSessionMutateAsync,
+        }}
+      />
+      <SessionExpireDialog sessionCreatedAt={sessionCreatedAt} />
+    </>
   );
 }
 
